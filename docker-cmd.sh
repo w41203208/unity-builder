@@ -101,6 +101,7 @@ elif [ "$1" == "exec" ]; then
     elif [ "$2" == "return" ]; then
       sudo docker exec -it "$container" script/run-in-docker.sh return
     fi
+  fi
 elif [ "$1" == "stop" ]; then
   while read -r container_id; do
     sudo docker stop "$container_id"
