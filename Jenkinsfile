@@ -18,7 +18,7 @@ pipeline {
           sudo mkdir temp
           sudo mkdir build
 
-          if [ -e containers.txt ]; then
+          if [ -f containers.txt ]; then
             while read -r container_id; do
               container_exit=$(sudo docker ps -a | grep "$container_id");
               if [ "$container_exit" != "" ]; then
