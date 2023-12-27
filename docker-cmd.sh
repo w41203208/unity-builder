@@ -31,7 +31,8 @@ BUILD_PROJECT_PATH="/app/Coin-Pusher-Dannis"
 # ubuntu: /app/build
 BUILD_TARGET_PATH="/app/build"
 
-if [ "$1" == "build" ]; then
+
+if [ "$1" = "build" ]; then
   if [ "$UNITY_OS_VERSION" == "windows" ]; then
     dockerfile="$DOCKERFILE_NAME_PATH_WINDOWS"
   elif [ "$UNITY_OS_VERSION" == "ubuntu" ]; then
@@ -60,7 +61,7 @@ if [ "$1" == "build" ]; then
     echo "Dockerfile file could not be found at $dockerfile"
   fi
 
-elif [ "$1" == "run" ]; then
+elif [ "$1" = "run" ]; then
   if [ "$UNITY_OS_VERSION" == "windows" ]; then
     volumn_buildpath="$(pwd)/build:C:\app\build"
     volumn_temppath="$(pwd)/temp:C:\app\temp"
@@ -84,7 +85,7 @@ elif [ "$1" == "run" ]; then
 
   sudo docker ps | grep "$IMAGE_NAME" | awk '{print $1}' >containers.txt
 
-elif [ "$1" == "exec" ]; then
+elif [ "$1" = "exec" ]; then
   if [ "$#" -ne 2 ]; then
     exit 1
   else
@@ -94,15 +95,15 @@ elif [ "$1" == "exec" ]; then
       container="$container_id"
     done <containers.txt
 
-    if [ "$2" == "ls" ]; then
+    if [ "$2" = "ls" ]; then
       sudo docker exec -it "$container" ls
-    elif [ "$2" == "active" ]; then
+    elif [ "$2" = "active" ]; then
       sudo docker exec -it "$container" script/run-in-docker.sh active
-    elif [ "$2" == "return" ]; then
+    elif [ "$2" = "return" ]; then
       sudo docker exec -it "$container" script/run-in-docker.sh return
     fi
   fi
-elif [ "$1" == "stop" ]; then
+elif [ "$1" = "stop" ]; then
   while read -r container_id; do
     echo "stop container $(sudo docker stop "$container_id")"
 
