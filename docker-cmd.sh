@@ -104,9 +104,9 @@ elif [ "$1" == "exec" ]; then
   fi
 elif [ "$1" == "stop" ]; then
   while read -r container_id; do
-    sudo docker stop "$container_id"
+    echo "stop container $(sudo docker stop "$container_id")"
 
-    sudo docker rm "$container_id"
+    echo "remove container $(sudo docker rm "$container_id")"
   done <containers.txt
 else
   echo "Invalid command. Usage: $0 {build|run|exec|stop}"
