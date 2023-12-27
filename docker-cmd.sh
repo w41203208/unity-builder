@@ -71,15 +71,15 @@ elif [ "$1" = "run" ]; then
   fi
 
   # if container is exist, return license, stop and remove it
-  while read -r container_id; do
-    container_exit=$(sudo docker ps -a | grep "$container_id")
-    if [ "$container_exit" != "" ]; then
-      sudo docker exec -it "$container_id" script/run-in-docker.sh return
+  # while read -r container_id; do
+  #   container_exit=$(sudo docker ps -a | grep "$container_id")
+  #   if [ "$container_exit" != "" ]; then
+  #     sudo docker exec -it "$container_id" script/run-in-docker.sh return
 
-      sudo docker stop "$container_id"
-      sudo docker rm "$container_id"
-    fi
-  done <containers.txt
+  #     sudo docker stop "$container_id"
+  #     sudo docker rm "$container_id"
+  #   fi
+  # done <containers.txt
 
   sudo docker compose -f docker-compose.yml up -d
 
