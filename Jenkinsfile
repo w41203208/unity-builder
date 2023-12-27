@@ -19,31 +19,24 @@ pipeline {
           sudo mkdir build
 
           if [ -f $(pwd)/containers.txt ]; then
-            echo get file>>test.log;
             while read -r container_id; do
               cc=$container_id
-              echo get container id: $cc >> test.log;
               cc_exit=$(sudo docker ps -a | grep "$cc");
               echo $cc_exit >> test.log;
               if [ "$cc_exit" != "" ]; then
-                echo stop>>test.log;
+                sh docker-cmd.sh exec return>>test.log;
+
+                sh docker-cmd.sh stop>>test.log;
               fi;
             done < $(pwd)/containers.txt;
           fi
-
-          echo test outer $cc >>test.log
           
           sh docker-cmd.sh run>>test.log
           
+          sh docker-cmd.sh exec active>>test.log
           
           ''', flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
       }
     }
   }
 }
-//sh docker-cmd.sh stop>>test.log;
-// sh docker-cmd.sh exec return>>test.log;
-
-// sh docker-cmd.sh run>>test.log
-
-          // sh docker-cmd.sh exec active>>test.log
