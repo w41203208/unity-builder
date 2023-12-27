@@ -17,9 +17,9 @@ pipeline {
           sudo mkdir temp/
           sudo mkdir build/
 
-          sudo bash docker-cmd.sh stop>>test.log
-
           sudo bash docker-cmd.sh exec return>>test.log
+
+          sudo bash docker-cmd.sh stop>>test.log
 
           sudo bash docker-cmd.sh run>>test.log
 
