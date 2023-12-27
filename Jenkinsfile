@@ -24,7 +24,7 @@ pipeline {
               cc_exit=$(sudo docker ps -a | grep "$cc");
               echo $cc_exit >> test.log;
               if [ "$cc_exit" != "" ]; then
-                sh docker-cmd.sh exec return>>test.log;
+                sh docker-cmd.sh exec return >> test.log;
 
                 sh docker-cmd.sh stop>>test.log;
               fi;
@@ -33,7 +33,7 @@ pipeline {
           
           sh docker-cmd.sh run>>test.log
           
-          
+          sh docker-cmd.sh exec active>>test.log
           
           ''', flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
       }
