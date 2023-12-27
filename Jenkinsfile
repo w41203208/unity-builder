@@ -18,6 +18,8 @@ pipeline {
           sudo mkdir temp
           sudo mkdir build
 
+          cat containers.txt > read.log
+
           if [ -f containers.txt ]; then
             echo get file>>test.log;
             while read -r container_id; do
