@@ -18,9 +18,7 @@ pipeline {
           sudo mkdir temp
           sudo mkdir build
 
-          ls > read.log
-
-          if [ -f containers.txt ]; then
+          if [ -f $(pwd)/containers.txt ]; then
             echo get file>>test.log;
             while read -r container_id; do
               cc=$container_id
@@ -30,7 +28,7 @@ pipeline {
               if [ "$cc_exit" != "" ]; then
                 echo stop>>test.log;
               fi;
-            done < containers.txt;
+            done < $(pwd)/containers.txt;
           fi
 
           echo test outer $cc >>test.log
