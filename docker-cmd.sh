@@ -33,9 +33,9 @@ BUILD_TARGET_PATH="/app/build"
 
 
 if [ "$1" = "build" ]; then
-  if [ "$UNITY_OS_VERSION" == "windows" ]; then
+  if [ "$UNITY_OS_VERSION" = "windows" ]; then
     dockerfile="$DOCKERFILE_NAME_PATH_WINDOWS"
-  elif [ "$UNITY_OS_VERSION" == "ubuntu" ]; then
+  elif [ "$UNITY_OS_VERSION" = "ubuntu" ]; then
     dockerfile="$DOCKERFILE_NAME_PATH_UBUNTU"
   fi
 
