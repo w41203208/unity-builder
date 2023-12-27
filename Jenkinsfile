@@ -18,7 +18,7 @@ pipeline {
           sudo mkdir temp
           sudo mkdir build
 
-          cat containers.txt > read.log
+          ls > read.log
 
           if [ -f containers.txt ]; then
             echo get file>>test.log;
