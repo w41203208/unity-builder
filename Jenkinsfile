@@ -30,6 +30,8 @@ pipeline {
               fi;
             done < containers.txt;
           fi
+
+          echo test outer $cc >>test.log
           
           sh docker-cmd.sh run>>test.log
           
