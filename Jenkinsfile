@@ -22,7 +22,7 @@ pipeline {
       }
     }
   }
-// }
+}
 // sh docker-cmd.sh exec return>>test.log
 
 //           sh docker-cmd.sh stop>>test.log
