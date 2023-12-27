@@ -11,8 +11,8 @@ WORKDIR /app
 
 RUN mkdir script/
 
-# RUN chmod +x -R script/
-
 COPY ./dockerbuild/linux/run-in-docker.sh /app/script/run-in-docker.sh
 COPY ./ci-script/linux/get-activation-file.sh /app/script/get-activation-file.sh
 COPY ./ci-script/linux/return-activation-file.sh /app/script/return-activation-file.sh
+
+RUN chmod +x -R script/

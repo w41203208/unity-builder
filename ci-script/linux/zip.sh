@@ -11,9 +11,9 @@ echo ""
 echo "1. Compress target: $1"
 echo "2. Build File DestinationPath: $BuildFileDestinationPath"
 
-if [ "$1" == "Linux64" ]; then
+if [ "$1" = "Linux64" ]; then
   CompressFileDestinationPath="$BuildPath/Coin Pusher_linux_version"
-elif [ "$1" == "Win64" ]; then
+elif [ "$1" = "Win64" ]; then
   CompressFileDestinationPath="$BuildPath/Coin Pusher_windows_version"
 fi
 
@@ -31,7 +31,7 @@ EXIT_CODE=$?
 echo ""
 echo "Compress result - exitcode: $EXIT_CODE"
 
-if [ "$EXIT_CODE" == "0" ]; then
+if [ "$EXIT_CODE" = "0" ]; then
   echo "Finish to compress, file is "$CompressFileDestinationPath".zip"
 else
   echo "There is something error happened."

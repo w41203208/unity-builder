@@ -1,9 +1,9 @@
 #!/bin/bash
 
-chmod +x "/app/script/get-activation-file.sh"
-chmod +x "/app/script/return-activation-file.sh"
+# chmod +x "/app/script/get-activation-file.sh"
+# chmod +x "/app/script/return-activation-file.sh"
 
-if [ "$1" == "active" ]; then
+if [ "$1" = "active" ]; then
   echo ""
   echo ""
   echo "-------------- Get Activation File --------------"
@@ -18,7 +18,7 @@ if [ "$1" == "active" ]; then
     "$BUILD_TEMP_DIRECTORY" 
 
 
-elif [ "$1" == "return" ]; then
+elif [ "$1" = "return" ]; then
   echo ""
   echo ""
   echo "-------------- Return Activation File --------------"

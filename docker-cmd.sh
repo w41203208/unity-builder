@@ -62,10 +62,10 @@ if [ "$1" = "build" ]; then
   fi
 
 elif [ "$1" = "run" ]; then
-  if [ "$UNITY_OS_VERSION" == "windows" ]; then
+  if [ "$UNITY_OS_VERSION" = "windows" ]; then
     volumn_buildpath="$(pwd)/build:C:\app\build"
     volumn_temppath="$(pwd)/temp:C:\app\temp"
-  elif [ "$UNITY_OS_VERSION" == "ubuntu" ]; then
+  elif [ "$UNITY_OS_VERSION" = "ubuntu" ]; then
     volumn_buildpath="$(pwd)/build:/app/build"
     volumn_temppath="$(pwd)/temp:/app/temp"
   fi
