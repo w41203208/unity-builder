@@ -21,7 +21,7 @@ pipeline {
           if [ -f containers.txt ]; then
             echo get file>>test.log;
             while read -r container_id; do
-              echo get container id>>test.log;
+              echo get container id: $container_id>>test.log;
               container_exit=$(sudo docker ps -a | grep "$container_id");
               echo $container_exit>>test.log;
               if [ "$container_exit" != "" ]; then
