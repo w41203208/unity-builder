@@ -22,17 +22,13 @@ pipeline {
             while read -r container_id; do
               container_exit=$(sudo docker ps -a | grep "$container_id");
               if [ "$container_exit" != "" ]; then
-                // sh docker-cmd.sh exec return>>test.log;
                 sh docker-cmd.sh stop>>test.log;
               fi;
             done <containers.txt;
           fi
           
           
-          sh docker-cmd.sh run>>test.log
-
-          // sh docker-cmd.sh exec active>>test.log
-
+          
           
           ''', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'test/unity-builder ', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
       }
@@ -40,6 +36,8 @@ pipeline {
   }
 }
 
-//           sh docker-cmd.sh run>>test.log
+// sh docker-cmd.sh exec return>>test.log;
 
-//           sh docker-cmd.sh exec active>>test.log
+// sh docker-cmd.sh run>>test.log
+
+          // sh docker-cmd.sh exec active>>test.log
