@@ -17,13 +17,14 @@ pipeline {
           sudo mkdir temp
           sudo mkdir build
 
+          sh docker-cmd.sh exec return>>test.log
+
           
           ''', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'test/unity-builder ', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
       }
     }
   }
 }
-// sh docker-cmd.sh exec return>>test.log
 
 //           sh docker-cmd.sh stop>>test.log
 
