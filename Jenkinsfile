@@ -23,9 +23,9 @@ pipeline {
             while read -r container_id; do
               echo get container id>>test.log;
               container_exit=$(sudo docker ps -a | grep "$container_id");
+              echo $container_exit
               if [ "$container_exit" != "" ]; then
                 echo stop>>test.log;
-                sh docker-cmd.sh stop>>test.log;
               fi;
             done <containers.txt;
           fi
@@ -38,7 +38,7 @@ pipeline {
     }
   }
 }
-
+//sh docker-cmd.sh stop>>test.log;
 // sh docker-cmd.sh exec return>>test.log;
 
 // sh docker-cmd.sh run>>test.log
