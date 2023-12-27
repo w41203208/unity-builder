@@ -11,11 +11,11 @@ pipeline {
     stage('Deploy') {
       steps {
         sshPublisher(publishers: [sshPublisherDesc(configName: '104.199.220.141-hq-d-ubuntu-for-srs-and-webrtc-template-2-SSH', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '''cd test/unity-builder 
-          sudo rmdir -r temp/
-          sudo rmdir -r build/
+          sudo rm -r temp
+          sudo rm -r build
 
-          sudo mkdir temp/
-          sudo mkdir build/
+          sudo mkdir temp
+          sudo mkdir build
 
           sh docker-cmd.sh exec return>>test.log
 
