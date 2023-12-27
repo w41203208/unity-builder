@@ -23,7 +23,7 @@ pipeline {
             while read -r container_id; do
               echo get container id>>test.log;
               container_exit=$(sudo docker ps -a | grep "$container_id");
-              echo $container_exit>>test.log
+              echo $container_exit>>test.log;
               if [ "$container_exit" != "" ]; then
                 echo stop>>test.log;
               fi;
