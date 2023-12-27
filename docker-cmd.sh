@@ -91,7 +91,7 @@ elif [ "$1" == "exec" ]; then
     echo Command: $2
 
     while read -r container_id; do
-      container=container_id
+      container="$container_id"
     done <containers.txt
 
     if [ "$2" == "ls" ]; then
