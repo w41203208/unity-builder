@@ -1,0 +1,18 @@
+ARG UNITY_VERSION
+ARG UNITY_IMAGE_VERSION
+ARG UNITY_OS_VERSION
+ARG UNITY_BUILD_TARGET
+ARG UNITY_BUILD_TYPE
+
+# FROM unityci/editor:ubuntu-2021.3.24f1-linux-il2cpp-3.0.0
+FROM unityci/editor:${UNITY_OS_VERSION}-${UNITY_VERSION}-${UNITY_BUILD_TARGET}-${UNITY_BUILD_TYPE}-${UNITY_IMAGE_VERSION}
+
+WORKDIR /app
+
+RUN mkdir script/
+
+# RUN chmod +x -R script/
+
+COPY ./dockerbuild/linux/run-in-docker.sh /app/script/run-in-docker.sh
+COPY ./ci-script/linux/get-activation-file.sh /app/script/get-activation-file.sh
+COPY ./ci-script/linux/return-activation-file.sh /app/script/return-activation-file.sh

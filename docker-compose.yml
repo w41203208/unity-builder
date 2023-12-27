@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  unity-editor:
+    image: custom-unity-editor:latest
+    stdin_open: true
+    tty: true
+    working_dir: /app
+    env_file:
+    - .env
+    volumes:
+      - ./build:/app/build
+      - ./temp:/app/temp
+    environment:
+      - UNITY_VERSION=${UNITY_VERSION}
+      - UNITY_USERNAME=${UNITY_USERNAME}
+      - UNITY_PASSWORD=${UNITY_PASSWORD}
+      - UNITY_SERIALKEY=${UNITY_SERIALKEY}
+      - BUILD_TARGET=${BUILD_TARGET}
+      - BUILD_PROJECT_PATH=${BUILD_PROJECT_PATH}
+      - BUILD_TARGET_PATH=${BUILD_TARGET_PATH}
+      - BUILD_TEMP_DIRECTORY=${BUILD_TEMP_DIRECTORY}
