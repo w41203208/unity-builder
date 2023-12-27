@@ -100,10 +100,10 @@ elif [ "$1" = "exec" ]; then
       sudo docker exec -it "$container" ls
     elif [ "$2" = "active" ]; then
       echo execute active
-      sudo docker exec -it "$container" script/run-in-docker.sh active
+      sudo docker exec -it "$container" script/run-in-docker.sh active>>test.log
     elif [ "$2" = "return" ]; then
       echo execute return
-      sudo docker exec -it "$container" script/run-in-docker.sh return
+      sudo docker exec -it "$container" script/run-in-docker.sh return>>test.log
     fi
   fi
 elif [ "$1" = "stop" ]; then
