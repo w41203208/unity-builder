@@ -2,7 +2,7 @@
 
 # will change this code
 path="$(pwd)/Coin-Pusher-Dannis"
-if [ -e "$path"]
+if [ -e "$path"]; then
   rmdir -r "$path"
 fi
 

@@ -107,7 +107,7 @@ elif [ "$1" = "exec" ]; then
         echo "You don't have input project download URL"
         exit 1
       fi
-      sudo docker exec "$contianer" script/run-in-docker.sh pre-build $3
+      sudo docker exec "$container" script/run-in-docker.sh pre-build $3
     elif [ "$2" = "build" ]; then
       if [ "$3" = "" ]; then
         echo "You don't have input Project Name"
