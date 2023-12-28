@@ -3,12 +3,13 @@
 # chmod +x "/app/script/get-activation-file.sh"
 # chmod +x "/app/script/return-activation-file.sh"
 
+echo input: $1>test.log
 if [ "$1" = "active" ]; then
   echo ""
   echo ""
   echo "-------------- Get Activation File --------------"
   echo ""
-
+  echo inner execute get>test.log
   # Activate license Step
   /app/script/get-activation-file.sh \
     "unity-editor" \
@@ -24,6 +25,7 @@ elif [ "$1" = "return" ]; then
   echo "-------------- Return Activation File --------------"
   echo ""
 
+  echo inner execute return>test.log
   # Return license Step
   /app/script/return-activation-file.sh \
     "unity-editor" \
