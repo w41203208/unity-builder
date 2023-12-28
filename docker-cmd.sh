@@ -91,7 +91,7 @@ elif [ "$1" = "run" ]; then
 
   sudo docker ps | grep "$IMAGE_NAME" | awk '{print $1}' >containers.txt
 
-  echo "Docker run successfully."
+  echo "Docker container: "$(sudo docker ps | grep "$IMAGE_NAME" | awk '{print $1}')" run successfully."
 
 elif [ "$1" = "exec" ]; then
   echo
