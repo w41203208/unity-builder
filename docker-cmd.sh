@@ -42,8 +42,8 @@ if [ "$1" = "build" ]; then
   # build dcoker image
   if [ -e "$dockerfile" ]; then
     echo
-    echo "########## Docker Image Build Step ##########"
     echo
+    echo "########## Docker Image Build Step ##########"
     echo
     echo "### Docker build info ###"
     echo
@@ -65,8 +65,8 @@ if [ "$1" = "build" ]; then
 
 elif [ "$1" = "run" ]; then
   echo
-  echo "########## Docker Run Step ##########"
   echo
+  echo "########## Docker Run Step ##########"
   echo
   if [ "$UNITY_OS_VERSION" = "windows" ]; then
     volumn_buildpath="$(pwd)/build:C:\app\build"
@@ -76,17 +76,6 @@ elif [ "$1" = "run" ]; then
     volumn_temppath="$(pwd)/temp:/app/temp"
   fi
 
-  # if container is exist, return license, stop and remove it
-  # while read -r container_id; do
-  #   container_exit=$(sudo docker ps -a | grep "$container_id")
-  #   if [ "$container_exit" != "" ]; then
-  #     sudo docker exec -it "$container_id" script/run-in-docker.sh return
-
-  #     sudo docker stop "$container_id"
-  #     sudo docker rm "$container_id"
-  #   fi
-  # done <containers.txt
-
   sudo docker compose -f docker-compose.yml up -d
 
   sudo docker ps | grep "$IMAGE_NAME" | awk '{print $1}' >containers.txt
@@ -95,8 +84,8 @@ elif [ "$1" = "run" ]; then
 
 elif [ "$1" = "exec" ]; then
   echo
-  echo "########## Docker Exec Step ##########"
   echo
+  echo "########## Docker Exec Step ##########"
   echo
   if [ "$#" -ne 2 ]; then
     exit 1
@@ -117,8 +106,8 @@ elif [ "$1" = "exec" ]; then
   fi
 elif [ "$1" = "stop" ]; then
   echo
-  echo "########## Docker Stop Step ##########"
   echo
+  echo "########## Docker Stop Step ##########"
   echo
   while read -r container_id; do
     echo "Stop container $(sudo docker stop "$container_id")"
