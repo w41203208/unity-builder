@@ -42,6 +42,8 @@ if [ "$1" = "build" ]; then
   # build dcoker image
   if [ -e "$dockerfile" ]; then
     echo
+    echo "########## Docker Image Build Step ##########"
+    echo
     echo
     echo "### Docker build info ###"
     echo
@@ -62,6 +64,10 @@ if [ "$1" = "build" ]; then
   fi
 
 elif [ "$1" = "run" ]; then
+  echo
+  echo "########## Docker Run Step ##########"
+  echo
+  echo
   if [ "$UNITY_OS_VERSION" = "windows" ]; then
     volumn_buildpath="$(pwd)/build:C:\app\build"
     volumn_temppath="$(pwd)/temp:C:\app\temp"
@@ -85,12 +91,18 @@ elif [ "$1" = "run" ]; then
 
   sudo docker ps | grep "$IMAGE_NAME" | awk '{print $1}' >containers.txt
 
+  echo "Docker run successfully."
+
 elif [ "$1" = "exec" ]; then
+  echo
+  echo "########## Docker Exec Step ##########"
+  echo
+  echo
   if [ "$#" -ne 2 ]; then
     exit 1
   else
-    echo Command: $2
-
+    echo "### Exec execute command: $2 ###"
+    echo
     while read -r container_id; do
       container="$container_id"
     done <containers.txt
@@ -98,18 +110,20 @@ elif [ "$1" = "exec" ]; then
     if [ "$2" = "ls" ]; then
       sudo docker exec "$container" ls
     elif [ "$2" = "active" ]; then
-      echo execute active
       sudo docker exec "$container" script/run-in-docker.sh active
     elif [ "$2" = "return" ]; then
-      echo execute return
       sudo docker exec "$container" script/run-in-docker.sh return
     fi
   fi
 elif [ "$1" = "stop" ]; then
+  echo
+  echo "########## Docker Stop Step ##########"
+  echo
+  echo
   while read -r container_id; do
-    echo "stop container $(sudo docker stop "$container_id")"
+    echo "Stop container $(sudo docker stop "$container_id")"
 
-    echo "remove container $(sudo docker rm "$container_id")"
+    echo "Remove container $(sudo docker rm "$container_id")"
   done <containers.txt
 else
   echo "Invalid command. Usage: $0 {build|run|exec|stop}"

@@ -23,10 +23,9 @@ pipeline {
           if [ -f $(pwd)/containers.txt ]; then
             while read -r container_id; do
               cc=$container_id
-              cc_exit=$(sudo docker ps -a | grep "$cc");
-              echo $cc_exit >> test.log;
+              cc_exit=$(sudo docker ps -a | grep "$cc");=
               if [ "$cc_exit" != "" ]; then
-                sh docker-cmd.sh exec return>>test.log;
+                sh docker-cmd.sh exec return;
                 sh docker-cmd.sh stop>>test.log;
               fi;
             done < $(pwd)/containers.txt;
@@ -39,7 +38,7 @@ pipeline {
     stage('Test') {
       steps {
         sshPublisher(publishers: [sshPublisherDesc(configName: '104.199.220.141-hq-d-ubuntu-for-srs-and-webrtc-template-2-SSH', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '''cd test/unity-builder 
-          sh docker-cmd.sh exec active>>test.log
+          sh docker-cmd.sh exec active
           
           ''', flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
       }
