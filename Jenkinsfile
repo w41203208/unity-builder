@@ -34,7 +34,7 @@ pipeline {
               ], 
               usePromotionTimestamp: false, 
               useWorkspaceInPromotion: false, 
-              verbose: true
+              verbose: false
             )
           ]
         )

@@ -87,7 +87,7 @@ elif [ "$1" = "exec" ]; then
   echo
   echo "########## Docker Exec Step ##########"
   echo
-  if [ "$#" -le 2 ]; then
+  if [ "$#" -lt 2 ]; then
     exit 1
   else
     echo "### Exec execute command: $2 ###"
