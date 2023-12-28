@@ -4,7 +4,7 @@
 # chmod +x "/app/script/return-activation-file.sh"
 
 # test.log is used to test if it execute correct command
-rm -r test.log
+
 
 echo input: $1>>test.log
 if [ "$1" = "active" ]; then
