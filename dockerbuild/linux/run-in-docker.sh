@@ -15,7 +15,7 @@ if [ "$1" = "active" ]; then
     "$UNITY_USERNAME" \
     "$UNITY_PASSWORD" \
     "$UNITY_SERIALKEY" \
-    "$BUILD_TEMP_DIRECTORY" 
+    "$BUILD_TEMP_DIRECTORY"
 
 
 elif [ "$1" = "return" ]; then
