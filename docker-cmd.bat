@@ -110,7 +110,7 @@ if %1==build (
     )
 
     if "%2"=="ls" (
-      docker exec -it !container! ls
+      docker exec ls
     ) else if "%2"=="active" (
       docker exec -it !container! script/run-in-docker.sh active
     ) else if "%2"=="return" (
