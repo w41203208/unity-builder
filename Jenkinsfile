@@ -13,10 +13,10 @@ pipeline {
                   excludes: '', 
                   execCommand: '''cd test/unity-builder
                     sudo rm -r temp
-                    sudo rm -r build
+                    
 
                     sudo mkdir temp
-                    sudo mkdir build
+                    
 
                     sudo rm -r test.log
 
