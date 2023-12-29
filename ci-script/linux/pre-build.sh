@@ -3,7 +3,7 @@
 # will change this code
 path="$(pwd)/$UNITY_PROJECT_NAME"
 if [ -e "$path" ]; then
-  cd path
+  cd "$path"
   git fetch
   git pull origin webRTC-dev-feature-buildtool
 else

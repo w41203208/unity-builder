@@ -29,7 +29,7 @@ elif [ "$1" = "return" ]; then
 elif [ "$1" = "pre-build" ]; then
   echo inner execute pre-build>>test.log
 
-  /app/script/pre-build.sh $2
+  /app/script/pre-build.sh "$2"
 elif [ "$1" = "build" ]; then
   echo inner execute build>>test.log
 
