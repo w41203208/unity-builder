@@ -1,13 +1,21 @@
 #!/bin/bash
 
 # will change this code
-path="$(pwd)/Coin-Pusher-Dannis"
-if [ -e "$path"]; then
-  rmdir -r "$path"
+path="$(pwd)/$UNITY_PROJECT_NAME"
+if [ -e "$path" ]; then
+  cd path
+  git fetch
+  git pull origin webRTC-dev-feature-buildtool
+else
+  git clone $1 --branch webRTC-dev-feature-buildtool --depth=1
 fi
 
-git clone $1 --branch webRTC-dev-feature-buildtool --depth=1
+# git clone $1 --branch webRTC-dev-feature-buildtool --depth=1
 
-mkdir "build/Coin Pusher"
+path="build/$UNITY_PROJECT_BUILD_FOLDER_NAME"
+if [ ! -d "$path" ]; then
+  mkdir "$path"
+fi
+
 
 
