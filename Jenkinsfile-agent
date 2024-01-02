@@ -3,8 +3,8 @@ pipeline {
   stages {
     stage('Test') {
       steps {
-        echo "Hello world"
-        echo "Test" > test.txt
+        ls
+
         // script {
 
         // }
