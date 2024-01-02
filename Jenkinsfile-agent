@@ -16,7 +16,9 @@ pipeline {
           sudo mkdir temp
           sudo mkdir build
 
-          sudo rm -r test.log
+          if [ -f test.log ]; then
+            sudo rm -r test.log;
+          fi
 
           sh docker-cmd.sh build>>test.log
         '''
