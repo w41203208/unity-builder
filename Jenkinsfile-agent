@@ -4,10 +4,13 @@ pipeline {
     stage('Test') {
       steps {
         echo "Hello world"
-
-        script {
+        sh '''
           ls
-        }
+        '''
+
+        // script {
+          
+        // }
       }
     }
   }
