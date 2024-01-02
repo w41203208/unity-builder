@@ -92,6 +92,7 @@ elif [ "$1" = "exec" ]; then
   else
     echo "### Exec execute command: $2 ###"
     echo
+    
     while read -r container_id; do
       container="$container_id"
     done <containers.txt
