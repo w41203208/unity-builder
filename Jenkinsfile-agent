@@ -1,29 +1,29 @@
 pipeline {
   agent { node { label "Agent-1" } }
   stages {
-    // stage('Build') {
-    //   steps {
-    //     echo "Hello world"
-    //     sh '''
-    //       if [ -e temp/ ]; then
-    //         sudo rm -r temp;
-    //       fi
+    stage('Build') {
+      steps {
+        echo "Hello world"
+        sh '''
+          if [ -e temp/ ]; then
+            sudo rm -r temp;
+          fi
 
-    //       if [ -e build/ ]; then
-    //         sudo rm -r build;
-    //       fi
+          if [ -e build/ ]; then
+            sudo rm -r build;
+          fi
 
-    //       sudo mkdir temp
-    //       sudo mkdir build
+          sudo mkdir temp
+          sudo mkdir build
 
-    //       if [ -f test.log ]; then
-    //         sudo rm -r test.log;
-    //       fi
+          if [ -f test.log ]; then
+            sudo rm -r test.log;
+          fi
 
-    //       sh docker-cmd.sh build
-    //     '''
-    //   }
-    // }
+          sh docker-cmd.sh build
+        '''
+      }
+    }
     stage('Return-Active') {
       steps {
         sh '''
