@@ -5,9 +5,16 @@ pipeline {
       steps {
         echo "Hello world"
         sh '''
-          sudo rm -r temp
-          
+          if [ -e temp/ ]; then
+            sudo rm -r temp;
+          fi
+
+          if [ -e build/ ]; then
+            sudo rm -r build;
+          fi
+
           sudo mkdir temp
+          sudo mkdir build
 
           sudo rm -r test.log
 
