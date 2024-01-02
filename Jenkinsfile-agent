@@ -5,7 +5,13 @@ pipeline {
       steps {
         echo "Hello world"
         sh '''
-          ls
+          sudo rm -r temp
+          
+          sudo mkdir temp
+
+          sudo rm -r test.log
+
+          sh docker-cmd.sh build>>test.log
         '''
 
         // script {
