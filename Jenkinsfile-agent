@@ -3,11 +3,11 @@ pipeline {
   stages {
     stage('Test') {
       steps {
-        ls
+        echo "Hello world"
 
-        // script {
-
-        // }
+        script {
+          ls
+        }
       }
     }
   }
