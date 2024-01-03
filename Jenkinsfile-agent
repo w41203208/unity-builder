@@ -43,7 +43,6 @@ pipeline {
     stage('Post-Deploy') {
       steps {
         sh '''
-
         if [ -f $(pwd)/containers.txt ]; then
           while read -r container_id; do
             cc=$container_id
@@ -54,10 +53,10 @@ pipeline {
             fi;
           done < $(pwd)/containers.txt;
         fi
-          
         '''
+
+        archiveArtifacts artifacts: 'containers.txt', followSymlinks: false
       }
-      // sudo docker ps | grep "custom-unity-editor" | awk '{print $1}' >containers.txt
     }
     stage('Deploy') {
       steps {
