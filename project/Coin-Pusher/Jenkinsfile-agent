@@ -1,0 +1,136 @@
+pipeline {
+  agent { node { label "Agent-1" } }
+  options {
+    copyArtifactPermission('test-unity-builder-2');
+  }
+  environment { 
+    UNITY_PROJECT_URL = 'https://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@github.com/wanin2021/Coin-Pusher-Dannis.git'
+    UNITY_PROJECT_NAME = 'Coin-Pusher-Dannis'
+
+    UNITY_PROJECT_BUILD_FOLDER_NAME = 'Coin Pusher'
+    UNITY_PROJECT_BUILD_EXECUTE_NAME = 'Coin Pusher'
+    UNITY_PROJECT_BUILD_TARGET = 'Linux64'
+  }
+  stages {
+    stage('Get-Artifacts') {
+      steps {
+        sh '''
+        if [ -f $(pwd)/containers.txt ]; then
+          sudo rm -r $(pwd)/containers.txt
+        fi
+        '''
+        copyArtifacts(projectName: 'test-unity-builder-2', flatten: false, selector: [$class: 'LastCompletedBuildSelector'])
+      }
+    }
+    stage('Pre-Build') {
+      steps {
+        sh '''
+          if [ -f $(pwd)/containers.txt ]; then
+            while read -r container_id; do
+              cc=$container_id;
+              cc_exit=$(sudo docker ps -a | grep "$cc");
+              echo $cc_exit
+              if [ "$cc_exit" != "" ]; then'''+"""
+                sudo docker exec -e "UNITY_PROJECT_NAME=${UNITY_PROJECT_NAME}" \\
+                  -e "UNITY_PROJECT_BUILD_FOLDER_NAME=${UNITY_PROJECT_BUILD_FOLDER_NAME}" \\"""+'''
+                  "$cc" \\'''+"""
+                  script/run-in-docker.sh pre-build "${UNITY_PROJECT_URL}";"""+'''
+              fi;
+            done < $(pwd)/containers.txt;
+          fi
+        '''
+      }
+    }
+    stage('Build') {
+      steps {
+        sh '''
+          if [ -f $(pwd)/containers.txt ]; then
+            while read -r container_id; do
+              cc=$container_id
+              cc_exit=$(sudo docker ps -a | grep "$cc");
+              if [ "$cc_exit" != "" ]; then'''+"""
+                sudo docker exec -e "UNITY_PROJECT_NAME=${UNITY_PROJECT_NAME}" \\
+                  -e "UNITY_PROJECT_BUILD_FOLDER_NAME=${UNITY_PROJECT_BUILD_FOLDER_NAME}" \\"""+'''
+                  "$cc" \\'''+"""
+                  script/run-in-docker.sh build "${UNITY_PROJECT_NAME}";"""+'''
+              fi;
+            done < $(pwd)/containers.txt;
+          fi
+        '''
+      }
+    }
+    stage('Pass-ZIP') {
+      steps {
+        sh """
+          FolderName=${UNITY_PROJECT_BUILD_FOLDER_NAME}
+          """+'''
+          if [ -f $(pwd)/containers.txt ]; then
+            while read -r container_id; do
+              cc=$container_id
+              cc_exit=$(sudo docker ps -a | grep "$cc");
+              if [ "$cc_exit" != "" ]; then
+                sudo docker cp "$cc:/app/build/$FolderName_windows_version.zip" $(pwd)
+              fi;
+            done < $(pwd)/containers.txt;
+          fi
+        '''+"""
+          export UNITY_PROJECT_BUILD_TARGET=${UNITY_PROJECT_BUILD_TARGET}
+
+          if [ "${UNITY_PROJECT_BUILD_TARGET}" = "Linux64" ]; then
+            if [ -f "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip" ]; then
+              gcloud storage cp "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip" gs://unity-editor-build-storage;
+            fi;
+          elif [ "${UNITY_PROJECT_BUILD_TARGET}" = "Win64" ]; then
+            if [ -f "${UNITY_PROJECT_BUILD_FOLDER_NAME}_windows_version.zip" ]; then
+              gcloud storage cp "${UNITY_PROJECT_BUILD_FOLDER_NAME}_windows_version.zip" gs://unity-editor-build-storage;
+            fi;
+          fi
+        """
+      }
+    }
+    // stage('Deploy') {
+    //   steps {
+    //     sshPublisher(
+    //       publishers: [
+    //         sshPublisherDesc(
+    //           configName: '104.199.220.141-hq-d-ubuntu-for-srs-and-webrtc-template-2-SSH-ubuntu', 
+    //           transfers: [
+    //             sshTransfer(
+    //               cleanRemote: false, 
+    //               excludes: '', 
+    //               execCommand: """
+    //                 cd /home/ubuntu/Downloads
+                    
+    //                 sh delete.sh "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version"
+
+    //                 if [ "${UNITY_PROJECT_BUILD_TARGET}" == "Linux64" ]; then
+    //                   gcloud storage cp "gs://unity-editor-build-storage/${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip" /home/ubuntu/Downloads;
+    //                 elif [ "${UNITY_PROJECT_BUILD_TARGET}" == "Win64" ]; then
+    //                   gcloud storage cp "gs://unity-editor-build-storage/${UNITY_PROJECT_BUILD_FOLDER_NAME}_windows_version.zip" /home/ubuntu/Downloads;
+    //                 fi
+                    
+    //                 sh unzip.sh "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version" "${UNITY_PROJECT_BUILD_EXECUTE_NAME}"
+
+    //                 export DISPLAY=:0.0
+    //                 nohup /home/ubuntu/Downloads/execute.sh 5 Landscape TestTest > output.log 2>&1 &
+    //                 """, 
+    //               flatten: false,
+    //               makeEmptyDirs: true, 
+    //               noDefaultExcludes: false, 
+    //               patternSeparator: '[, ]+', 
+    //               remoteDirectory: '', 
+    //               remoteDirectorySDF: false, 
+    //               removePrefix: '', 
+    //               sourceFiles: ''
+    //             )
+    //           ], 
+    //           usePromotionTimestamp: false, 
+    //           useWorkspaceInPromotion: false, 
+    //           verbose: true
+    //         )
+    //       ]
+    //     )
+    //   }
+    // }
+  }
+}
