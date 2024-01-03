@@ -87,11 +87,12 @@ elif [ "$1" = "exec" ]; then
   echo
   echo "########## Docker Exec Step ##########"
   echo
-  if [ "$#" -ne 2 ]; then
+  if [ "$#" -lt 2 ]; then
     exit 1
   else
     echo "### Exec execute command: $2 ###"
     echo
+    
     while read -r container_id; do
       container="$container_id"
     done <containers.txt
@@ -102,6 +103,18 @@ elif [ "$1" = "exec" ]; then
       sudo docker exec "$container" script/run-in-docker.sh active
     elif [ "$2" = "return" ]; then
       sudo docker exec "$container" script/run-in-docker.sh return
+    elif [ "$2" = "pre-build" ]; then
+      if [ "$3" = "" ]; then
+        echo "You don't have input project download URL"
+        exit 1
+      fi
+      sudo docker exec "$contianer" script/run-in-docker.sh pre-build $3
+    elif [ "$2" = "build" ]; then
+      if [ "$3" = "" ]; then
+        echo "You don't have input Project Name"
+        exit 1
+      fi
+      sudo docker exec "$container" script/run-in-docker.sh build $3
     fi
   fi
 elif [ "$1" = "stop" ]; then

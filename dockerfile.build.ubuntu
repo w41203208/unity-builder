@@ -14,5 +14,7 @@ RUN mkdir script/
 COPY ./dockerbuild/linux/run-in-docker.sh /app/script/run-in-docker.sh
 COPY ./ci-script/linux/get-activation-file.sh /app/script/get-activation-file.sh
 COPY ./ci-script/linux/return-activation-file.sh /app/script/return-activation-file.sh
+COPY ./ci-script/linux/pre-build.sh /app/script/pre-build.sh
+COPY ./ci-script/linux/build.sh /app/script/build.sh
 
 RUN chmod +x -R script/
