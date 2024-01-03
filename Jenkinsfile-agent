@@ -54,8 +54,6 @@ pipeline {
           done < $(pwd)/containers.txt;
         fi
         '''
-
-        archiveArtifacts artifacts: 'containers.txt', followSymlinks: false
       }
     }
     stage('Deploy') {
@@ -70,6 +68,11 @@ pipeline {
         sh '''
           sh docker-cmd.sh exec active
         '''
+      }
+    }
+    stage('Upload-Artifacts') {
+      steps {
+        archiveArtifacts artifacts: 'containers.txt', followSymlinks: false
       }
     }
   }
