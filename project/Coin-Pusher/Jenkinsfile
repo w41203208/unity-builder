@@ -1,7 +1,7 @@
 pipeline {
   agent { node { label "Main" } }
   environment { 
-    UNITY_PROJECT_URL = 'https://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@github.com/wanin2021/Coin-Pusher-Dannis.git'
+    UNITY_PROJECT_URL = 'https://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@github.com/wanin2021/Coin-Pusher-Dannis.git'
     UNITY_PROJECT_NAME = 'Coin-Pusher-Dannis'
     UNITY_PROJECT_BUILD_FOLDER_NAME = 'Coin Pusher'
     UNITY_PROJECT_BUILD_EXECUTE_NAME = 'Coin Pusher'
