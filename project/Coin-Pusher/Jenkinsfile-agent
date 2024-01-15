@@ -4,7 +4,7 @@ pipeline {
     copyArtifactPermission('test-unity-builder-2');
   }
   environment { 
-    UNITY_PROJECT_URL = 'https://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@github.com/wanin2021/Coin-Pusher-Dannis.git'
+    UNITY_PROJECT_URL = 'https://w41203208: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@github.com/wanin2021/Coin-Pusher-Dannis.git'
     UNITY_PROJECT_NAME = 'Coin-Pusher-Dannis'
 
     UNITY_PROJECT_BUILD_FOLDER_NAME = 'Coin Pusher'
@@ -61,76 +61,94 @@ pipeline {
     }
     stage('Pass-ZIP') {
       steps {
-        sh """
-          FolderName=${UNITY_PROJECT_BUILD_FOLDER_NAME}
-          """+'''
+        sh '''
           if [ -f $(pwd)/containers.txt ]; then
             while read -r container_id; do
               cc=$container_id
               cc_exit=$(sudo docker ps -a | grep "$cc");
               if [ "$cc_exit" != "" ]; then
-                sudo docker cp "$cc:/app/build/$FolderName_windows_version.zip" $(pwd)
+                '''+"""
+                export UNITY_PROJECT_BUILD_TARGET=${UNITY_PROJECT_BUILD_TARGET}
+
+                if [ "${UNITY_PROJECT_BUILD_TARGET}" = "Linux64" ]; then"""+'''
+                  sudo docker cp "$cc:/app/build/'''+"""${UNITY_PROJECT_BUILD_FOLDER_NAME}"""+'''_linux_version.zip" $(pwd)'''+"""
+                  
+                  ### use gcp cloud storage
+                  #if [ -f "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip" ]; then
+                    #gcloud storage cp "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip" gs://unity-editor-build-storage;
+                  #fi;
+                elif [ "${UNITY_PROJECT_BUILD_TARGET}" = "Win64" ]; then"""+'''
+                  sudo docker cp "$cc:/app/build/'''+"""${UNITY_PROJECT_BUILD_FOLDER_NAME}"""+'''_windows_version.zip" $(pwd)'''+"""
+                  
+                  ### use gcp cloud storage
+                  #if [ -f "${UNITY_PROJECT_BUILD_FOLDER_NAME}_windows_version.zip" ]; then
+                    #gcloud storage cp "${UNITY_PROJECT_BUILD_FOLDER_NAME}_windows_version.zip" gs://unity-editor-build-storage;
+                  #fi;
+                fi
+              """+'''
               fi;
             done < $(pwd)/containers.txt;
           fi
-        '''+"""
-          export UNITY_PROJECT_BUILD_TARGET=${UNITY_PROJECT_BUILD_TARGET}
-
-          if [ "${UNITY_PROJECT_BUILD_TARGET}" = "Linux64" ]; then
-            if [ -f "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip" ]; then
-              gcloud storage cp "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip" gs://unity-editor-build-storage;
-            fi;
-          elif [ "${UNITY_PROJECT_BUILD_TARGET}" = "Win64" ]; then
-            if [ -f "${UNITY_PROJECT_BUILD_FOLDER_NAME}_windows_version.zip" ]; then
-              gcloud storage cp "${UNITY_PROJECT_BUILD_FOLDER_NAME}_windows_version.zip" gs://unity-editor-build-storage;
-            fi;
-          fi
-        """
+        '''
+        script {
+          // use stash to store file temporarily
+          stash(name: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_File", includes: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip")
+        }
+        
       }
     }
-    // stage('Deploy') {
-    //   steps {
-    //     sshPublisher(
-    //       publishers: [
-    //         sshPublisherDesc(
-    //           configName: '104.199.220.141-hq-d-ubuntu-for-srs-and-webrtc-template-2-SSH-ubuntu', 
-    //           transfers: [
-    //             sshTransfer(
-    //               cleanRemote: false, 
-    //               excludes: '', 
-    //               execCommand: """
-    //                 cd /home/ubuntu/Downloads
+    stage('Download-Artifact-From-Build-Server') {
+      agent { node { label "Main" } }
+      steps {
+        script {
+          // use stash to store file temporarily
+          unstash(name: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_File")
+        }
+        archiveArtifacts artifacts: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip", followSymlinks: false
+      }
+    }
+    stage('Deploy') {
+      agent { node { label "Main" } }
+      steps {
+        sshPublisher(
+          publishers: [
+            sshPublisherDesc(
+              configName: '104.199.220.141-hq-d-ubuntu-for-srs-and-webrtc-template-2-SSH-ubuntu', 
+              transfers: [
+                sshTransfer(
+                  cleanRemote: false, 
+                  excludes: '', 
+                  execCommand: """
+                    cd /home/ubuntu/Downloads
                     
-    //                 sh delete.sh "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version"
+                    sh delete.sh "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version"
 
-    //                 if [ "${UNITY_PROJECT_BUILD_TARGET}" == "Linux64" ]; then
-    //                   gcloud storage cp "gs://unity-editor-build-storage/${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip" /home/ubuntu/Downloads;
-    //                 elif [ "${UNITY_PROJECT_BUILD_TARGET}" == "Win64" ]; then
-    //                   gcloud storage cp "gs://unity-editor-build-storage/${UNITY_PROJECT_BUILD_FOLDER_NAME}_windows_version.zip" /home/ubuntu/Downloads;
-    //                 fi
+                    wget --auth-no-challenge --user=jay --password=jaytest "34.81.83.64:2010/job/Jay.test/job/test-unity-project-2/lastSuccessfulBuild/artifact/${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip"
                     
-    //                 sh unzip.sh "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version" "${UNITY_PROJECT_BUILD_EXECUTE_NAME}"
+                    sh unzip.sh "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version" "${UNITY_PROJECT_BUILD_EXECUTE_NAME}"
 
-    //                 export DISPLAY=:0.0
-    //                 nohup /home/ubuntu/Downloads/execute.sh 5 Landscape TestTest > output.log 2>&1 &
-    //                 """, 
-    //               flatten: false,
-    //               makeEmptyDirs: true, 
-    //               noDefaultExcludes: false, 
-    //               patternSeparator: '[, ]+', 
-    //               remoteDirectory: '', 
-    //               remoteDirectorySDF: false, 
-    //               removePrefix: '', 
-    //               sourceFiles: ''
-    //             )
-    //           ], 
-    //           usePromotionTimestamp: false, 
-    //           useWorkspaceInPromotion: false, 
-    //           verbose: true
-    //         )
-    //       ]
-    //     )
-    //   }
-    // }
+                    export DISPLAY=:0.0
+                    
+                    nohup /home/ubuntu/Downloads/execute.sh 5 Landscape Machine > output.log 2>&1 &
+                    """, 
+                  flatten: false,
+                  makeEmptyDirs: true, 
+                  noDefaultExcludes: false, 
+                  patternSeparator: '[, ]+', 
+                  remoteDirectory: '', 
+                  remoteDirectorySDF: false, 
+                  removePrefix: '', 
+                  sourceFiles: ''
+                )
+              ], 
+              usePromotionTimestamp: false, 
+              useWorkspaceInPromotion: false, 
+              verbose: true
+            )
+          ]
+        )
+      }
+    }
   }
 }
+
