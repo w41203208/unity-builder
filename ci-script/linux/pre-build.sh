@@ -6,9 +6,9 @@ path="$(pwd)/$UNITY_PROJECT_NAME"
 if [ -e "$path" ]; then
   cd "$path"
   git fetch
-  git pull origin webRTC-dev-feature-buildtool
+  git pull origin $UNITY_PROJECT_BRANCH
 else
-  git clone $1 --branch webRTC-dev-feature-buildtool --depth=1
+  git clone $1 --branch $UNITY_PROJECT_BRANCH --depth=1
 fi
 
 cd "$original_path"
