@@ -16,12 +16,9 @@ UNITY_OS_VERSION="ubuntu"
 UNITY_BUILD_TARGET="linux"
 UNITY_BUILD_TYPE="il2cpp"
 UNITY_IMAGE_VERSION=3
-UNITY_USERNAME="awscc124@wanin.tw"
-UNITY_PASSWORD="Wanin@124"
-UNITY_SERIALKEY="SC-9YZC-GK5A-88Y7-2ZXR-JFK2"
-
-# Project set
-BUILD_TARGET="Linux64"
+# UNITY_USERNAME="awscc124@wanin.tw"
+# UNITY_PASSWORD="Wanin@124"
+# UNITY_SERIALKEY="SC-9YZC-GK5A-88Y7-2ZXR-JFK2"
 
 # windows: C:\app\Coin-Pusher-Dannis
 # ubuntu: /app/Coin-Pusher-Dannis

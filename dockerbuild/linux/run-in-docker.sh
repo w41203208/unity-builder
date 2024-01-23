@@ -15,7 +15,6 @@ if [ "$1" = "active" ]; then
     "$UNITY_SERIALKEY" \
     "$BUILD_TEMP_DIRECTORY"
 
-
 elif [ "$1" = "return" ]; then
   # Return license Step
   /app/script/return-activation-file.sh \
@@ -23,12 +22,13 @@ elif [ "$1" = "return" ]; then
     "$UNITY_USERNAME" \
     "$UNITY_PASSWORD" \
     "$BUILD_TEMP_DIRECTORY"
-elif [ "$1" = "pre-build" ]; then
 
+elif [ "$1" = "pre-build" ]; then
   /app/script/pre-build.sh "$2"
 elif [ "$1" = "build" ]; then
-
-  /app/script/build.sh $2
+  /app/script/build.sh "$2"
+elif [ "$1" = "zip" ]; then
+  /app/script/zip.sh "$2"
 else
   echo "Invalid command. Usage: $0 {active|return}"
 fi
