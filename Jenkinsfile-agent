@@ -30,9 +30,8 @@ pipeline {
           if [ -f "$(pwd)/containers.txt" ]; then
             while read -r container_id; do
               cc=$container_id
-              cc_exit=$(sudo docker ps -a | grep "$cc");
-              exit=$(echo $cc_exit | grep "Exited");
-              if [ "$exit" = "" ]; then
+              cc_exit=$(sudo docker ps -a | grep "$cc" | grep "Exited");
+              if [ "$cc_exit" = "" ]; then
                 echo testtestestsetsetset;
                 sh docker-cmd.sh exec return;
               fi;
