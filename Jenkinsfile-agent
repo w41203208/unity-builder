@@ -29,10 +29,9 @@ pipeline {
         sh '''
           if [ -f "$(pwd)/containers.txt" ]; then
             while read -r container_id; do
-              cc=$container_id
-              cc_exit="$(sudo docker ps -a | grep "$cc" | grep "Exited")";
-              echo testtestestsetsetset;
-              if [ "$cc_exit" = "" ]; then
+              cc=$container_id;
+              cc_exit=$(sudo docker ps -a | grep "$cc");
+              if [ "$cc_exit" != "" ]; then
                 sh docker-cmd.sh exec return;
               fi;
             done < $(pwd)/containers.txt;
@@ -45,7 +44,7 @@ pipeline {
         sh '''
         if [ -f "$(pwd)/containers.txt" ]; then
           while read -r container_id; do
-            cc=$container_id
+            cc=$container_id;
             cc_exit=$(sudo docker ps -a | grep "$cc");
             if [ "$cc_exit" != "" ]; then
               sh docker-cmd.sh stop;
