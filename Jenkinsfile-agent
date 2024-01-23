@@ -31,8 +31,8 @@ pipeline {
             while read -r container_id; do
               cc=$container_id
               cc_exit=$(sudo docker ps -a | grep "$cc");
-              cc_exit=$(echo $cc_exit | grep "Exited");
-              if [ "$cc_exit" = "" ]; then
+              exit=$(echo $cc_exit | grep "Exited");
+              if [ "$exit" = "" ]; then
                 echo testtestestsetsetset;
                 sh docker-cmd.sh exec return;
               fi;
