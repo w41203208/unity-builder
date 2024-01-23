@@ -33,6 +33,7 @@ pipeline {
               cc_exit=$(sudo docker ps -a | grep "$cc");
               cc_exit=$(echo $cc_exit | grep "Exited")
               if [ "$cc_exit" = "" ]; then
+                echo testtestestsetsetset;
                 sh docker-cmd.sh exec return;
               fi;
             done < $(pwd)/containers.txt;
