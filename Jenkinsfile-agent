@@ -27,7 +27,7 @@ pipeline {
     stage('Return-Active') {
       steps {
         sh '''
-          if [ -f $(pwd)/containers.txt ]; then
+          if [ -f "$(pwd)/containers.txt" ]; then
             while read -r container_id; do
               cc=$container_id
               cc_exit=$(sudo docker ps -a | grep "$cc");
@@ -43,12 +43,11 @@ pipeline {
     stage('Post-Deploy') {
       steps {
         sh '''
-        if [ -f $(pwd)/containers.txt ]; then
+        if [ -f "$(pwd)/containers.txt" ]; then
           while read -r container_id; do
             cc=$container_id
             cc_exit=$(sudo docker ps -a | grep "$cc");
             if [ "$cc_exit" != "" ]; then
-              
               sh docker-cmd.sh stop;
             fi;
           done < $(pwd)/containers.txt;

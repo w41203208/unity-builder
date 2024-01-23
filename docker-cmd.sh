@@ -55,6 +55,7 @@ if [ "$1" = "build" ]; then
       --build-arg UNITY_IMAGE_VERSION="$UNITY_IMAGE_VERSION" \
       --build-arg UNITY_BUILD_TARGET="$UNITY_BUILD_TARGET" \
       --build-arg UNITY_BUILD_TYPE="$UNITY_BUILD_TYPE" .
+
   else
     echo
     echo "Dockerfile file could not be found at $dockerfile"
@@ -123,6 +124,13 @@ elif [ "$1" = "stop" ]; then
     echo "Stop container $(sudo docker stop "$container_id")"
 
     echo "Remove container $(sudo docker rm "$container_id")"
+
+    for image in $(sudo docker images | grep "none" | awk '{print $3}'); do
+      if [ "$image" != "" ]; then
+        echo "old version image: $image"
+        sudo docker rmi $image
+      fi
+    done
   done <containers.txt
 else
   echo "Invalid command. Usage: $0 {build|run|exec|stop}"
