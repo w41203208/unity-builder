@@ -1,22 +1,34 @@
 pipeline {
   agent { node { label "Agent-1" } }
   options {
-    copyArtifactPermission('Jay.test/test-unity-builder-2');
+    copyArtifactPermission('Unity Editor (Docker)/Unity-Editor (Docker)');
   }
   environment { 
     // gcp instance
     GCP_INSTANCE = '104.199.220.141-hq-d-ubuntu-for-srs-and-webrtc-template-2-SSH-ubuntu' //What is the gcp instance you want to deploy
 
     // unity project
-    UNITY_PROJECT_URL = 'https://w41203208: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@github.com/wanin2021/Coin-Pusher-Dannis.git'
+    UNITY_PROJECT_URL = 'https://w41203208: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@github.com/wanin2021/Coin-Pusher-Dannis.git'
     UNITY_PROJECT_NAME = 'Coin-Pusher-Dannis'
     UNITY_PROJECT_BRANCH = 'webRTC-dev-feature-buildtool'
-
     UNITY_PROJECT_BUILD_FOLDER_NAME = 'Coin Pusher'
     UNITY_PROJECT_BUILD_EXECUTE_NAME = 'Coin Pusher'
     UNITY_PROJECT_BUILD_TARGET = 'Linux64'
+    // This is necessary to require input "/app/{project name}" 
+    APP_DIRECTORY="/app"
+    BUILD_DIRECTORY="/app/build"
+    // unity project credential
   }
   stages {
+    // stage('Get-Git-Credential') {
+    //   steps {
+    //     script {
+    //       withCredentials([gitUsernamePassword(credentialsId: 'f6ab0e9d-ac10-40df-8b64-f3940cdc7b4e', gitToolName: 'Default')]) {
+    //           // git clone 
+    //       }
+    //     }
+    //   }
+    // }
     stage('Get-Artifacts') {
       steps {
         sh '''
@@ -24,7 +36,7 @@ pipeline {
           sudo rm -r "$(pwd)/containers.txt"
         fi
         '''
-        copyArtifacts(projectName: 'Jay.test/test-unity-builder-2', flatten: false, selector: [$class: 'LastCompletedBuildSelector'])
+        copyArtifacts(projectName: 'Unity Editor (Docker)/Unity-Editor (Docker)', flatten: false, selector: [$class: 'LastCompletedBuildSelector'])
       }
     }
     stage('Pre-Build') {
@@ -57,13 +69,37 @@ pipeline {
               cc_exit=$(sudo docker ps -a | grep "$cc");
               if [ "$cc_exit" != "" ]; then'''+"""
                 sudo docker exec \\
+                  -e "BUILD_TARGET_PATH=${BUILD_DIRECTORY}/${UNITY_PROJECT_BUILD_FOLDER_NAME}" \\
+                  -e "UNTIY_PROJECT_PATH=${APP_DIRECTORY}/${UNITY_PROJECT_NAME}" \\
+                  -e "UNITY_PROJECT_BUILD_TARGET=${UNITY_PROJECT_BUILD_TARGET}" \\
                   -e "UNITY_PROJECT_NAME=${UNITY_PROJECT_NAME}" \\
-                  -e "UNITY_PROJECT_BUILD_FOLDER_NAME=${UNITY_PROJECT_BUILD_FOLDER_NAME}" \\"""+'''
+                  -e "UNITY_PROJECT_BUILD_EXECUTE_NAME=${UNITY_PROJECT_BUILD_EXECUTE_NAME}" \\"""+'''
                   "$cc" \\'''+"""
-                  script/run-in-docker.sh build "${UNITY_PROJECT_NAME}";"""+'''
+                  script/run-in-docker.sh build "${APP_DIRECTORY}/${UNITY_PROJECT_NAME}";"""+'''
               fi;
             done < "$(pwd)/containers.txt";
           fi
+        '''
+      }
+    }
+    stage('Zip') {
+      steps {
+        sh '''
+          if [ -f "$(pwd)/containers.txt" ]; then
+            while read -r container_id; do
+              cc=$container_id
+              cc_exit=$(sudo docker ps -a | grep "$cc");
+              if [ "$cc_exit" != "" ]; then'''+"""
+                sudo docker exec \\
+                  -e "BUILD_TARGET_DIRECTORY=${BUILD_DIRECTORY}" \\
+                  -e "UNITY_PROJECT_BUILD_FOLDER_NAME=${UNITY_PROJECT_BUILD_FOLDER_NAME}" \\
+                  -e "UNITY_PROJECT_BUILD_TARGET=${UNITY_PROJECT_BUILD_TARGET}" \\"""+'''
+                  "$cc" \\'''+"""
+                  script/run-in-docker.sh zip "${APP_DIRECTORY}/${UNITY_PROJECT_NAME}";"""+'''
+              fi;
+            done < "$(pwd)/containers.txt";
+          fi
+           
         '''
       }
     }
@@ -107,84 +143,84 @@ pipeline {
         archiveArtifacts artifacts: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip", followSymlinks: false
       }
     }
-    stage('Deploy') {
-      agent { node { label "Main" } }
-      steps {
-        sshPublisher(
-          publishers: [
-            sshPublisherDesc(
-              configName: "${GCP_INSTANCE}", 
-              transfers: [
-                sshTransfer(
-                  cleanRemote: false, 
-                  excludes: '', 
-                  execCommand: """
-                    cd /home/ubuntu/Downloads
-                    ### delete ###
+    // stage('Deploy') {
+    //   agent { node { label "Main" } }
+    //   steps {
+    //     sshPublisher(
+    //       publishers: [
+    //         sshPublisherDesc(
+    //           configName: "${GCP_INSTANCE}", 
+    //           transfers: [
+    //             sshTransfer(
+    //               cleanRemote: false, 
+    //               excludes: '', 
+    //               execCommand: """
+    //                 cd /home/ubuntu/Downloads
+    //                 ### delete ###
 
-                    temp=${UNITY_PROJECT_BUILD_FOLDER_NAME}"""+'''
+    //                 temp=${UNITY_PROJECT_BUILD_FOLDER_NAME}"""+'''
                     
-                    zipfile=$(find ./ -name "$temp_linux_version.zip-*")'''+"""
+    //                 zipfile=$(find ./ -name "$temp_linux_version.zip-*")'''+"""
 
-                    """+'''if [ -f $zipfile ]; then
-                      rm "$zipfile"
-                    fi'''+"""
+    //                 """+'''if [ -f $zipfile ]; then
+    //                   rm "$zipfile"
+    //                 fi'''+"""
 
-                    zipfile="./${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip"
+    //                 zipfile="./${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip"
 
-                    """+'''if [ -f $zipfile ]; then
-                      rm "$zipfile"
-                    fi'''+"""
+    //                 """+'''if [ -f $zipfile ]; then
+    //                   rm "$zipfile"
+    //                 fi'''+"""
 
-                    rm -r "/home/ubuntu/Desktop/Coin Pusher"
-                    ### delete ###
-                    
-
-                    # change user and password to rd account
-                    wget --auth-no-challenge --user=jay --password=jaytest "34.81.83.64:2010/job/Jay.test/job/test-unity-project-2/lastSuccessfulBuild/artifact/${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip"
-
+    //                 rm -r "/home/ubuntu/Desktop/Coin Pusher"
+    //                 ### delete ###
                     
 
-                    ### unzip ###
+    //                 # change user and password to rd account
+    //                 wget --auth-no-challenge --user=jay --password=jaytest "34.81.83.64:2010/job/Jay.test/job/test-unity-project-2/lastSuccessfulBuild/artifact/${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip"
+
                     
-                    executeFileName="${UNITY_PROJECT_BUILD_EXECUTE_NAME}"
 
-                    zipfile="./${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip"
-
-                    """+'''unzip "$zipfile"'''+"""
-
-                    changeExecuteFileName="${UNITY_PROJECT_BUILD_EXECUTE_NAME}"
-                    dirFileName="${UNITY_PROJECT_BUILD_FOLDER_NAME}"
-
-                    """+'''sudo mv "$dirFileName" /home/ubuntu/Desktop
-
-                    cp "/home/ubuntu/Desktop/$dirFileName/$executeFileName.x86_64" "/home/ubuntu/Desktop/$dirFileName/$changeExecuteFileName.x86_64"
-
-                    sudo chmod -R 777 "/home/ubuntu/Desktop/$dirFileName"
-                    ### unzip ###
-
-                    export DISPLAY=:0.0
+    //                 ### unzip ###
                     
-                    nohup /home/ubuntu/Downloads/execute.sh 5 Landscape Machine > output.log 2>&1 &
-                    ''', 
-                  flatten: false,
-                  makeEmptyDirs: true, 
-                  noDefaultExcludes: false, 
-                  patternSeparator: '[, ]+', 
-                  remoteDirectory: '', 
-                  remoteDirectorySDF: false, 
-                  removePrefix: '', 
-                  sourceFiles: ''
-                )
-              ], 
-              usePromotionTimestamp: false, 
-              useWorkspaceInPromotion: false, 
-              verbose: true
-            )
-          ]
-        )
-      }
-    }
+    //                 executeFileName="${UNITY_PROJECT_BUILD_EXECUTE_NAME}"
+
+    //                 zipfile="./${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip"
+
+    //                 """+'''unzip "$zipfile"'''+"""
+
+    //                 changeExecuteFileName="${UNITY_PROJECT_BUILD_EXECUTE_NAME}"
+    //                 dirFileName="${UNITY_PROJECT_BUILD_FOLDER_NAME}"
+
+    //                 """+'''sudo mv "$dirFileName" /home/ubuntu/Desktop
+
+    //                 cp "/home/ubuntu/Desktop/$dirFileName/$executeFileName.x86_64" "/home/ubuntu/Desktop/$dirFileName/$changeExecuteFileName.x86_64"
+
+    //                 sudo chmod -R 777 "/home/ubuntu/Desktop/$dirFileName"
+    //                 ### unzip ###
+
+    //                 export DISPLAY=:0.0
+                    
+    //                 nohup /home/ubuntu/Downloads/execute.sh 5 Landscape Machine > output.log 2>&1 &
+    //                 ''', 
+    //               flatten: false,
+    //               makeEmptyDirs: true, 
+    //               noDefaultExcludes: false, 
+    //               patternSeparator: '[, ]+', 
+    //               remoteDirectory: '', 
+    //               remoteDirectorySDF: false, 
+    //               removePrefix: '', 
+    //               sourceFiles: ''
+    //             )
+    //           ], 
+    //           usePromotionTimestamp: false, 
+    //           useWorkspaceInPromotion: false, 
+    //           verbose: true
+    //         )
+    //       ]
+    //     )
+    //   }
+    // }
   }
 }
 

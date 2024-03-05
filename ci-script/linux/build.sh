@@ -9,9 +9,9 @@ cd $1
 echo ""
 echo "########## Build Step ##########"
 echo ""
-echo "1. Build target: $BUILD_TARGET"
-echo "2. Build project: $PROJECT_PATH"
-echo "3. Build destinationPath: $DIRECTORY"
+echo "1. Build target: $UNITY_PROJECT_BUILD_TARGET"
+echo "2. Build project: $UNTIY_PROJECT_PATH"
+echo "3. Build destinationPath: $BUILD_TARGET_PATH/$UNITY_PROJECT_BUILD_EXECUTE_NAME"
 
 # maybe use timestamp to store, don't remove old version folder
 rm -rf "$BUILD_TARGET_PATH"
