@@ -7,6 +7,7 @@ pipeline {
     // gcp instance
     GCP_INSTANCE = '104.199.220.141-hq-d-ubuntu-for-srs-and-webrtc-template-2-SSH-ubuntu' //What is the gcp instance you want to deploy
 
+
     // unity project
     UNITY_PROJECT_URL = 'https://w41203208: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@github.com/wanin2021/Coin-Pusher-Dannis.git'
     UNITY_PROJECT_NAME = 'Coin-Pusher-Dannis'
@@ -130,7 +131,6 @@ pipeline {
           // use stash to store file temporarily
           stash(name: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_File", includes: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip")
         }
-        
       }
     }
     stage('Download-Artifact-From-Build-Server') {

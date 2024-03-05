@@ -31,7 +31,8 @@ pipeline {
             while read -r container_id; do
               cc=$container_id;
               cc_exit=$(sudo docker ps -a | grep "$cc");
-              if [ "$cc_exit" != "" ]; then
+              cc_exit=$(echo $cc_exit | grep "Exited")
+              if [ "$cc_exit" = "" ]; then
                 sh docker-cmd.sh exec return;
               fi;
             done < $(pwd)/containers.txt;
