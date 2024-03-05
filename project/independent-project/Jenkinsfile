@@ -1,0 +1,253 @@
+import groovy.transform.Field
+@Field def MyMap = [:]
+def DeserializeEneFile(file){
+  def data = readFile(file)
+  def envs = data.split("\n")
+  println "Env: "
+  envs.each { env ->
+    // env -> println env
+    def e = env.split("=")
+    this.MyMap[e[0]] = e[1]
+  }
+}
+pipeline {
+  agent { node { label "Agent-1" } }
+  environment {
+    // download project
+    DOWNLOAD_PROJECT = "Coin-Pusher-Dannis" // it is git respository name
+
+    // gcp instance
+    GCP_INSTANCE = '104.199.220.141-hq-d-ubuntu-for-srs-and-webrtc-template-2-SSH-ubuntu' //What is the gcp instance you want to deploy
+
+    // unity project
+    UNITY_PROJECT_URL = 'https://w41203208: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@github.com/wanin2021/Coin-Pusher-Dannis.git'
+
+    UNITY_PROJECT_BUILD_FOLDER_NAME = 'Coin Pusher'
+    UNITY_PROJECT_BUILD_EXECUTE_NAME = 'Coin Pusher'
+
+    // This is necessary to require input "/app/{project name}" 
+    APP_DIRECTORY="/app"
+    BUILD_DIRECTORY="/app/build"
+    UNITY_PROJECT_NAME = 'Coin-Pusher-Dannis'
+    UNITY_PROJECT_BRANCH = 'webRTC-dev-feature-buildtool'
+    UNITY_PROJECT_BUILD_TARGET = 'Linux64'
+
+
+    // unity project credential
+    // if it have to download respository from gitlab or other git service, this token is necessary
+  }
+  stages {
+    stage('Get-Git-Repository') {
+      steps {
+        sh """
+          if [ -e "${DOWNLOAD_PROJECT}" ]; then
+            sudo rm -r "${DOWNLOAD_PROJECT}";
+          fi
+        """
+        script {
+          withCredentials([gitUsernamePassword(credentialsId: 'f6ab0e9d-ac10-40df-8b64-f3940cdc7b4e', gitToolName: 'Default')]) {
+            sh """
+              git clone "https://github.com/wanin2021/${DOWNLOAD_PROJECT}.git" --branch webRTC-dev-feature-buildtool --depth=1
+            """
+          }
+          def exists = fileExists "${DOWNLOAD_PROJECT}/jenkinsfile.env"
+          if(exists){
+            DeserializeEneFile("${DOWNLOAD_PROJECT}/jenkinsfile.env")
+          }
+        }
+      }
+    }
+    stage('Get-Artifacts') {
+      steps {
+        sh '''
+        if [ -f "$(pwd)/containers.txt" ]; then
+          sudo rm -r "$(pwd)/containers.txt"
+        fi
+        '''
+        copyArtifacts(projectName: 'Unity Editor (Docker)/Unity-Editor (Docker)', flatten: false, selector: [$class: 'LastCompletedBuildSelector'])
+      }
+    }
+    stage('Pre-Build') {
+      steps {
+        sh '''
+          if [ -f "$(pwd)/containers.txt" ]; then
+            while read -r container_id; do
+              cc=$container_id;
+              cc_exit=$(sudo docker ps -a | grep "$cc");
+              echo $cc_exit
+              if [ "$cc_exit" != "" ]; then'''+"""
+                sudo docker exec \\
+                  -e "UNITY_PROJECT_BRANCH=${UNITY_PROJECT_BRANCH}" \\
+                  -e "UNITY_PROJECT_NAME=${UNITY_PROJECT_NAME}" \\
+                  -e "UNITY_PROJECT_BUILD_FOLDER_NAME=${UNITY_PROJECT_BUILD_FOLDER_NAME}" \\"""+'''
+                  "$cc" \\'''+"""
+                  script/run-in-docker.sh pre-build "${UNITY_PROJECT_URL}";"""+'''
+              fi;
+            done < "$(pwd)/containers.txt";
+          fi
+        '''
+      }
+    }
+    stage('Build') {
+      steps {
+        sh '''
+          if [ -f "$(pwd)/containers.txt" ]; then
+            while read -r container_id; do
+              cc=$container_id
+              cc_exit=$(sudo docker ps -a | grep "$cc");
+              if [ "$cc_exit" != "" ]; then'''+"""
+                sudo docker exec \\
+                  -e "BUILD_TARGET_PATH=${BUILD_DIRECTORY}/${UNITY_PROJECT_BUILD_FOLDER_NAME}" \\
+                  -e "UNTIY_PROJECT_PATH=${APP_DIRECTORY}/${UNITY_PROJECT_NAME}" \\
+                  -e "UNITY_PROJECT_BUILD_TARGET=${UNITY_PROJECT_BUILD_TARGET}" \\
+                  -e "UNITY_PROJECT_NAME=${UNITY_PROJECT_NAME}" \\
+                  -e "UNITY_PROJECT_BUILD_EXECUTE_NAME=${UNITY_PROJECT_BUILD_EXECUTE_NAME}" \\"""+'''
+                  "$cc" \\'''+"""
+                  script/run-in-docker.sh build "${APP_DIRECTORY}/${UNITY_PROJECT_NAME}";"""+'''
+              fi;
+            done < "$(pwd)/containers.txt";
+          fi
+        '''
+      }
+    }
+    stage('Zip') {
+      steps {
+        sh '''
+          if [ -f "$(pwd)/containers.txt" ]; then
+            while read -r container_id; do
+              cc=$container_id
+              cc_exit=$(sudo docker ps -a | grep "$cc");
+              if [ "$cc_exit" != "" ]; then'''+"""
+                sudo docker exec \\
+                  -e "BUILD_TARGET_DIRECTORY=${BUILD_DIRECTORY}" \\
+                  -e "UNITY_PROJECT_BUILD_FOLDER_NAME=${UNITY_PROJECT_BUILD_FOLDER_NAME}" \\
+                  -e "UNITY_PROJECT_BUILD_TARGET=${UNITY_PROJECT_BUILD_TARGET}" \\"""+'''
+                  "$cc" \\'''+"""
+                  script/run-in-docker.sh zip "${APP_DIRECTORY}/${UNITY_PROJECT_NAME}";"""+'''
+              fi;
+            done < "$(pwd)/containers.txt";
+          fi
+           
+        '''
+      }
+    }
+    stage('Pass-ZIP') {
+      steps {
+        sh '''
+          if [ -f "$(pwd)/containers.txt" ]; then
+            while read -r container_id; do
+              cc=$container_id
+              cc_exit=$(sudo docker ps -a | grep "$cc");
+              if [ "$cc_exit" != "" ]; then
+                '''+"""
+                export UNITY_PROJECT_BUILD_TARGET=${UNITY_PROJECT_BUILD_TARGET}
+
+                if [ "${UNITY_PROJECT_BUILD_TARGET}" = "Linux64" ]; then"""+'''
+                  sudo docker cp "$cc:/app/build/'''+"""${UNITY_PROJECT_BUILD_FOLDER_NAME}"""+'''_linux_version.zip" "$(pwd)"'''+"""
+                  
+                elif [ "${this.MyMap['UNITY_PROJECT_BUILD_TARGET']}" = "Win64" ]; then"""+'''
+                  sudo docker cp "$cc:/app/build/'''+"""${UNITY_PROJECT_BUILD_FOLDER_NAME}"""+'''_windows_version.zip" "$(pwd)"'''+"""
+                  
+                fi
+              """+'''
+              fi;
+            done < "$(pwd)/containers.txt";
+          fi
+        '''
+        script {
+          // use stash to store file temporarily
+          stash(name: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_File", includes: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip")
+        }
+        
+      }
+    }
+    stage('Download-Artifact-From-Build-Server') {
+      agent { node { label "Main" } }
+      steps {
+        script {
+          // use stash to store file temporarily
+          unstash(name: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_File")
+        }
+        archiveArtifacts artifacts: "${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip", followSymlinks: false
+      }
+    }
+    stage('Deploy') {
+      agent { node { label "Main" } }
+      steps {
+        sshPublisher(
+          publishers: [
+            sshPublisherDesc(
+              configName: "${GCP_INSTANCE}", 
+              transfers: [
+                sshTransfer(
+                  cleanRemote: false, 
+                  excludes: '', 
+                  execCommand: """
+                    cd /home/ubuntu/Downloads
+                    ### delete ###
+
+                    temp=${UNITY_PROJECT_BUILD_FOLDER_NAME}"""+'''
+                    
+                    zipfile=$(find ./ -name "$temp_linux_version.zip-*")'''+"""
+
+                    """+'''if [ -f $zipfile ]; then
+                      rm "$zipfile"
+                    fi'''+"""
+
+                    zipfile="./${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip"
+
+                    """+'''if [ -f $zipfile ]; then
+                      rm "$zipfile"
+                    fi'''+"""
+
+                    rm -r "/home/ubuntu/Desktop/Coin Pusher"
+                    ### delete ###
+                    
+
+                    # change user and password to rd account
+                    wget --auth-no-challenge --user=jay --password=jaytest "34.81.83.64:2010/job/Jay.test/job/test-unity-project-2/lastSuccessfulBuild/artifact/${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip"
+
+                    
+
+                    ### unzip ###
+                    
+                    executeFileName="${UNITY_PROJECT_BUILD_EXECUTE_NAME}"
+
+                    zipfile="./${UNITY_PROJECT_BUILD_FOLDER_NAME}_linux_version.zip"
+
+                    """+'''unzip "$zipfile"'''+"""
+
+                    changeExecuteFileName="${UNITY_PROJECT_BUILD_EXECUTE_NAME}"
+                    dirFileName="${UNITY_PROJECT_BUILD_FOLDER_NAME}"
+
+                    """+'''sudo mv "$dirFileName" /home/ubuntu/Desktop
+
+                    cp "/home/ubuntu/Desktop/$dirFileName/$executeFileName.x86_64" "/home/ubuntu/Desktop/$dirFileName/$changeExecuteFileName.x86_64"
+
+                    sudo chmod -R 777 "/home/ubuntu/Desktop/$dirFileName"
+                    ### unzip ###
+
+                    export DISPLAY=:0.0
+                    
+                    nohup /home/ubuntu/Downloads/execute.sh 5 Landscape MachineTest > output.log 2>&1 &
+                    ''', 
+                  flatten: false,
+                  makeEmptyDirs: true, 
+                  noDefaultExcludes: false, 
+                  patternSeparator: '[, ]+', 
+                  remoteDirectory: '', 
+                  remoteDirectorySDF: false, 
+                  removePrefix: '', 
+                  sourceFiles: ''
+                )
+              ], 
+              usePromotionTimestamp: false, 
+              useWorkspaceInPromotion: false, 
+              verbose: true
+            )
+          ]
+        )
+      }
+    }
+  }
+}
